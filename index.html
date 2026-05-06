@@ -4,154 +4,343 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ليث ستور | متجر روبلوكس</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { background: #0b1a2e; color: white; font-family: system-ui; margin: 0; padding: 20px; text-align: center; }
-        .products { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 20px; }
-        .card { background: #1e2a3a; border-radius: 20px; padding: 15px; width: 250px; }
-        img { width: 100%; height: 150px; object-fit: cover; border-radius: 12px; }
-        button { background: #e67e22; border: none; padding: 8px 16px; border-radius: 30px; color: white; margin-top: 10px; cursor: pointer; }
-        .menu-btn { position: fixed; top: 15px; left: 15px; background: #ffd966; width: 40px; height: 40px; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer; z-index: 999; }
-        .menu-btn span { width: 22px; height: 3px; background: black; }
-        .sidebar { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #0f1724; transition: 0.3s; padding: 70px 15px; z-index: 1000; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Tajawal', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0b1a2e 0%, #1a2a3a 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: rgba(10, 20, 35, 0.98);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.5);
+            border-right: 1px solid #ffd966;
+            padding: 80px 20px 30px;
+        }
+
         .sidebar.open { left: 0; }
-        .sidebar a { display: block; padding: 12px; margin: 8px 0; background: #1e2a3a; border-radius: 12px; text-decoration: none; color: white; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: #1e2a3a; width: 90%; max-width: 400px; border-radius: 28px; padding: 20px; }
-        input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 30px; border: none; background: #2d3e4f; color: white; }
-        .admin-btn { background: #27ae60; padding: 10px; border: none; border-radius: 30px; color: white; width: 100%; margin-top: 8px; cursor: pointer; }
-        .danger { background: #c0392b; }
-        .ticket-item { background: #0f1724; padding: 12px; border-radius: 16px; margin: 10px 0; cursor: pointer; }
-        .chat-area { background: #0f1724; border-radius: 16px; padding: 10px; height: 200px; overflow-y: auto; margin: 10px 0; }
-        .message { padding: 6px 12px; border-radius: 16px; margin: 5px; max-width: 80%; }
-        .message.customer { background: #2c3e50; margin-left: auto; text-align: right; }
+
+        .sidebar .close-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #ffd966;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 15px 20px;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover {
+            background: #e67e22;
+            transform: translateX(5px);
+        }
+
+        .menu-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #ffd966;
+            color: #1a2a3a;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .menu-btn span {
+            width: 25px;
+            height: 3px;
+            background: #1a2a3a;
+            border-radius: 3px;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px);
+            padding: 18px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid #ffd966;
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo img {
+            height: 60px;
+            width: 60px;
+            border-radius: 15px;
+            object-fit: cover;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #ffd966, #ff9f4a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 40px auto;
+            padding: 0 25px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .product-card {
+            background: rgba(20, 35, 55, 0.8);
+            backdrop-filter: blur(4px);
+            border-radius: 28px;
+            padding: 18px;
+            transition: all 0.25s;
+            border: 1px solid rgba(255, 217, 102, 0.3);
+            text-align: center;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 20px;
+            margin-bottom: 15px;
+        }
+
+        .buy-btn {
+            background: #e67e22;
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 60px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #1e2a3a;
+            max-width: 600px;
+            width: 90%;
+            border-radius: 30px;
+            padding: 30px;
+            border-top: 5px solid #ffd966;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: none;
+            background: #2d3e4f;
+            color: white;
+        }
+
+        .admin-btn {
+            background: #27ae60;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .admin-btn.danger { background: #c0392b; }
+
+        .chat-area {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #0f1724;
+            border-radius: 15px;
+            padding: 15px;
+        }
+
+        .message { margin: 10px 0; padding: 10px; border-radius: 10px; }
+        .message.customer { background: #2c3e50; text-align: right; }
         .message.admin { background: #e67e22; }
-        .message.system { background: #555; text-align: center; max-width: 100%; }
-        .product-item { display: flex; justify-content: space-between; background: #0f1724; padding: 8px; border-radius: 12px; margin: 5px 0; }
     </style>
 </head>
 <body>
 
 <div class="menu-btn" id="menuBtn"><span></span><span></span><span></span></div>
-<div class="sidebar" id="sidebar"><div style="text-align:left; cursor:pointer;" id="closeSidebar">✕</div><a id="sidebarAdminBtn">🔐 لوحة الإدارة</a><a id="sidebarTicketsBtn">🎫 تذاكري</a></div>
 
-<div style="margin-top: 50px;"><h1>ليث ستور</h1><p>متجر روبلوكس - نظام تذاكر</p></div>
-<div class="container"><h2>✨ منتجات روبلوكس ✨</h2><div id="productsContainer" class="products"></div></div>
-<footer style="margin-top:30px;">© 2025 ليث ستور</footer>
+<div class="sidebar" id="sidebar">
+    <div class="close-btn" id="closeSidebar">✕</div>
+    <a id="sidebarAdminBtn">🔐 لوحة الإدارة</a>
+    <a id="sidebarTicketsBtn">🎫 تذاكري</a>
+</div>
 
-<div id="ticketsModal" class="modal"><div class="modal-content"><h2>تذاكري</h2><div id="customerTicketsList"></div><button class="admin-btn" id="closeTicketsModal">إغلاق</button></div></div>
-<div id="chatModal" class="modal"><div class="modal-content"><h2 id="chatTitle">محادثة</h2><div id="chatMessages" class="chat-area"></div><textarea id="chatMessageInput" rows="2" placeholder="رسالتك..."></textarea><button id="sendMessageBtn" class="admin-btn">إرسال</button><button id="deleteTicketBtn" class="admin-btn danger">حذف التذكرة</button><button id="closeChatModal" class="admin-btn">إغلاق</button></div></div>
-<div id="adminModal" class="modal"><div class="modal-content"><div id="passwordScreen"><h2>دخول الإدارة</h2><input type="password" id="adminPassword" placeholder="كلمة السر"><button id="checkPasswordBtn" class="admin-btn">دخول</button><button id="closeModalBtn" class="admin-btn">إغلاق</button></div><div id="adminPanelScreen" style="display:none;"><h2>لوحة التحكم</h2><label>اسم المنتج</label><input type="text" id="productName"><label>رابط الصورة</label><input type="text" id="productImage"><label>السعر</label><input type="number" id="productPrice"><label>العملة</label><select id="productCurrency"><option>$ دولار</option><option>JD دينار</option></select><button id="addProductBtn" class="admin-btn">إضافة منتج</button><hr><h3>المنتجات الحالية</h3><div id="adminProductsList"></div><hr><h3>تذاكر الدعم</h3><div id="adminTicketsList"></div><button id="closeAdminPanelBtn" class="admin-btn">إغلاق</button></div></div></div>
+<div class="header">
+    <div class="logo">
+        <img src="https://cdn.discordapp.com/attachments/1478031378129096925/1501659062515798108/1778077435647.png" alt="ليث ستور">
+        <h1>ليث ستور</h1>
+    </div>
+</div>
+
+<div class="container">
+    <h2>✨ المنتجات المتاحة ✨</h2>
+    <div id="productsContainer" class="products-grid">جاري التحميل...</div>
+</div>
+
+<div id="ticketsModal" class="modal"><div class="modal-content"><h2>🎫 تذاكري</h2><div id="customerTicketsList"></div><button onclick="closeModals()" class="admin-btn">إغلاق</button></div></div>
+<div id="chatModal" class="modal"><div class="modal-content"><h2 id="chatTitle">المحادثة</h2><div id="chatMessages" class="chat-area"></div><textarea id="chatMessageInput" placeholder="رسالتك..."></textarea><button id="sendMessageBtn" class="admin-btn">إرسال</button><button id="closeChatBtn" class="admin-btn danger" style="margin-top:10px">إغلاق</button></div></div>
+<div id="adminModal" class="modal">
+    <div class="modal-content" id="adminContent">
+        <div id="passArea">
+            <input type="password" id="adminPassword" placeholder="كلمة السر">
+            <button onclick="checkAdmin()" class="admin-btn">دخول</button>
+        </div>
+        <div id="adminPanel" style="display:none">
+            <h3>➕ أضف منتج للجميع</h3>
+            <input type="text" id="pName" placeholder="اسم المنتج">
+            <input type="text" id="pImg" placeholder="رابط الصورة">
+            <input type="number" id="pPrice" placeholder="السعر">
+            <button onclick="addProduct()" class="admin-btn">نشر المنتج للكل 🚀</button>
+            <hr><div id="adminProductsList"></div>
+        </div>
+    </div>
+</div>
 
 <script>
-    const SUPABASE_URL = "https://rvtsojcfgpgxyoqacpuj.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_SQcjYxzBOK8bgyjqd5Xx7A_6f7XxJbr";
+    // إعداد Firebase
+    const firebaseConfig = { databaseURL: "https://zxf-support-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const ADMIN_PASSWORD = "8899916710";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    let currentCustomerId = localStorage.getItem("customer_id") || ("cust_" + Date.now());
-    if (!localStorage.getItem("customer_id")) localStorage.setItem("customer_id", currentCustomerId);
-    let products = [], currentTicket = null;
+    let customerId = localStorage.getItem("cust_id") || "c_" + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem("cust_id", customerId);
 
-    async function loadProducts() {
-        const { data, error } = await supabase.from('products').select('*').order('id', { ascending: false });
-        if (error) { document.getElementById("productsContainer").innerHTML = `<div style="color:red;">خطأ: ${error.message}</div>`; return; }
-        products = data || [];
-        const container = document.getElementById("productsContainer");
-        if (products.length === 0) { container.innerHTML = "<div>⚠️ لا توجد منتجات</div>"; return; }
-        container.innerHTML = products.map(p => `
-            <div class="card"><img src="${p.image}" onerror="this.src='https://picsum.photos/200/150'"><h3>${p.name}</h3><div>${p.currency} ${p.price}</div><button onclick="createTicket(${p.id}, '${p.name.replace(/'/g, "\\'")}')">شراء وفتح تذكرة</button></div>
-        `).join("");
+    // تحميل المنتجات للجميع
+    function loadProducts() {
+        db.ref('roblox_products').on('value', (snap) => {
+            const container = document.getElementById("productsContainer");
+            const adminList = document.getElementById("adminProductsList");
+            container.innerHTML = "";
+            adminList.innerHTML = "";
+            
+            if(!snap.exists()) { container.innerHTML = "لا يوجد منتجات حالياً."; return; }
+
+            snap.forEach((child) => {
+                const p = child.val();
+                const key = child.key;
+
+                // للعرض العام
+                container.innerHTML += `
+                    <div class="product-card">
+                        <img class="product-img" src="${p.image}" onerror="this.src='https://picsum.photos/id/20/300/200'">
+                        <h3>${p.name}</h3>
+                        <p style="color:#ffd966">${p.price} $</p>
+                        <button class="buy-btn" onclick="openTicket('${key}', '${p.name}')">🛒 شراء</button>
+                    </div>`;
+
+                // للعرض في لوحة الإدارة (للحذف)
+                adminList.innerHTML += `<div>${p.name} <button onclick="deleteProduct('${key}')" style="color:red">حذف</button></div>`;
+            });
+        });
     }
 
-    window.createTicket = async (productId, productName) => {
-        await supabase.from('tickets').delete().eq('customer_id', currentCustomerId).eq('product_id', productId);
-        const newTicket = { id: Date.now(), product_id: productId, product_name: productName, customer_id: currentCustomerId, created_at: new Date(), messages: [{ sender: "system", text: `✅ تم إنشاء تذكرة للمنتج: ${productName}`, timestamp: new Date().toISOString() }] };
-        const { error } = await supabase.from('tickets').insert(newTicket);
-        if (error) { alert("خطأ: " + error.message); return; }
-        alert(`تم فتح تذكرة ${productName}`);
-        await openTicket(newTicket.id);
-    };
+    function addProduct() {
+        const name = document.getElementById("pName").value;
+        const image = document.getElementById("pImg").value;
+        const price = document.getElementById("pPrice").value;
+        if(!name || !price) return alert("املا البيانات");
 
-    async function openTicket(ticketId) {
-        const { data: ticket, error } = await supabase.from('tickets').select('*').eq('id', ticketId).single();
-        if (error || !ticket) return;
-        currentTicket = ticket;
-        document.getElementById("chatTitle").innerText = `📝 ${ticket.product_name}`;
-        const msgs = ticket.messages || [];
-        document.getElementById("chatMessages").innerHTML = msgs.map(m => `<div class="message ${m.sender}"><strong>${m.sender === 'customer' ? '👤 أنت' : (m.sender === 'admin' ? '🛡️ الإدارة' : '📢 نظام')}</strong><br>${m.text}<br><small>${new Date(m.timestamp).toLocaleTimeString()}</small></div>`).join("");
-        document.getElementById("chatModal").style.display = "flex";
-        document.getElementById("deleteTicketBtn").onclick = async () => { if(confirm("حذف التذكرة؟")) { await supabase.from('tickets').delete().eq('id', ticketId); document.getElementById("chatModal").style.display = "none"; await loadCustomerTickets(); } };
+        db.ref('roblox_products').push({ name, image, price })
+        .then(() => { alert("تم النشر للجميع!"); document.getElementById("pName").value=""; });
     }
 
-    document.getElementById("sendMessageBtn").onclick = async () => {
-        if (!currentTicket) return;
-        const text = document.getElementById("chatMessageInput").value.trim();
-        if (!text) return;
-        const isAdmin = document.getElementById("adminPanelScreen").style.display === "block";
-        const sender = isAdmin ? "admin" : "customer";
-        const newMsg = { sender, text, timestamp: new Date().toISOString() };
-        const oldMsgs = currentTicket.messages || [];
-        const updated = [...oldMsgs, newMsg];
-        await supabase.from('tickets').update({ messages: updated }).eq('id', currentTicket.id);
-        currentTicket.messages = updated;
-        document.getElementById("chatMessages").innerHTML += `<div class="message ${sender}"><strong>${sender === 'admin' ? '🛡️ الإدارة' : '👤 أنت'}</strong><br>${text}<br><small>${new Date().toLocaleTimeString()}</small></div>`;
-        document.getElementById("chatMessageInput").value = "";
-        await loadAdminTickets();
-    };
-
-    async function loadCustomerTickets() {
-        const { data, error } = await supabase.from('tickets').select('*').eq('customer_id', currentCustomerId).order('id', { ascending: false });
-        if (error) return;
-        const container = document.getElementById("customerTicketsList");
-        if (!data || data.length === 0) { container.innerHTML = "<div>لا توجد تذاكر</div>"; return; }
-        container.innerHTML = data.map(t => `<div class="ticket-item" onclick="openTicket(${t.id})"><strong>${t.product_name}</strong><br>رسائل: ${t.messages?.length || 0}</div>`).join("");
+    function deleteProduct(key) {
+        if(confirm("حذف المنتج من عند الكل؟")) db.ref('roblox_products').child(key).remove();
     }
 
-    async function loadAdminTickets() {
-        const { data, error } = await supabase.from('tickets').select('*').order('id', { ascending: false });
-        if (error) return;
-        const container = document.getElementById("adminTicketsList");
-        if (!data || data.length === 0) { container.innerHTML = "<div>لا توجد تذاكر</div>"; return; }
-        container.innerHTML = data.map(t => `<div class="ticket-item" style="cursor:pointer;" onclick="adminViewTicket(${t.id})"><strong>${t.product_name}</strong><br>${t.customer_id.substring(0,12)}... | رسائل: ${t.messages?.length || 0}<br><button class="admin-btn danger" style="width:auto;padding:4px 12px;margin-top:5px;" onclick="event.stopPropagation(); adminDeleteTicket(${t.id})">حذف</button></div>`).join("");
-    }
-    window.adminViewTicket = async (id) => { await openTicket(id); };
-    window.adminDeleteTicket = async (id) => { if(confirm("حذف التذكرة؟")) { await supabase.from('tickets').delete().eq('id', id); await loadAdminTickets(); } };
-
-    async function addProduct() {
-        const name = document.getElementById("productName").value.trim();
-        const image = document.getElementById("productImage").value.trim() || "https://picsum.photos/200/150";
-        const price = parseFloat(document.getElementById("productPrice").value);
-        const currency = document.getElementById("productCurrency").value;
-        if (!name || isNaN(price)) { alert("املأ البيانات"); return; }
-        const { error } = await supabase.from('products').insert({ id: Date.now(), name, image, price, currency });
-        if (error) { alert("خطأ: " + error.message); return; }
-        await loadProducts();
-        await loadAdminProducts();
-        document.getElementById("productName").value = "";
-        document.getElementById("productPrice").value = "";
-        alert("تمت الإضافة");
+    // نظام التذاكر (مربوط بـ Firebase لضمان وصول الرسائل)
+    function openTicket(id, name) {
+        const tId = customerId + "_" + id;
+        db.ref('tickets/' + tId).update({ productName: name, customerId: customerId, status: 'open' });
+        alert("تم فتح تذكرة! اذهب لـ 'تذاكري' للتواصل مع ليث.");
     }
 
-    async function loadAdminProducts() {
-        const { data, error } = await supabase.from('products').select('*').order('id', { ascending: false });
-        if (error) return;
-        const container = document.getElementById("adminProductsList");
-        if (!data || data.length === 0) { container.innerHTML = "<div>لا توجد منتجات</div>"; return; }
-        container.innerHTML = data.map(p => `<div class="product-item"><span>${p.name} - ${p.currency} ${p.price}</span><button class="admin-btn danger" style="width:auto;padding:4px 12px;" onclick="deleteProduct(${p.id})">حذف</button></div>`).join("");
+    // إدارة المودالات والقائمة الجانبية
+    const sidebar = document.getElementById("sidebar");
+    document.getElementById("menuBtn").onclick = () => sidebar.classList.add("open");
+    document.getElementById("closeSidebar").onclick = () => sidebar.classList.remove("open");
+    document.getElementById("sidebarAdminBtn").onclick = () => { document.getElementById("adminModal").style.display="flex"; sidebar.classList.remove("open"); };
+    document.getElementById("sidebarTicketsBtn").onclick = () => { document.getElementById("ticketsModal").style.display="flex"; sidebar.classList.remove("open"); };
+    
+    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display="none"); }
+    function checkAdmin() {
+        if(document.getElementById("adminPassword").value === ADMIN_PASSWORD) {
+            document.getElementById("passArea").style.display="none";
+            document.getElementById("adminPanel").style.display="block";
+        } else { alert("غلط"); }
     }
-    window.deleteProduct = async (id) => { if(confirm("حذف المنتج؟")) { await supabase.from('products').delete().eq('id', id); await loadProducts(); await loadAdminProducts(); } };
 
-    // UI handlers
-    document.getElementById("menuBtn").onclick = () => document.getElementById("sidebar").classList.add("open");
-    document.getElementById("closeSidebar").onclick = () => document.getElementById("sidebar").classList.remove("open");
-    document.getElementById("sidebarAdminBtn").onclick = () => { document.getElementById("sidebar").classList.remove("open"); document.getElementById("adminModal").style.display = "flex"; document.getElementById("passwordScreen").style.display = "block"; document.getElementById("adminPanelScreen").style.display = "none"; };
-    document.getElementById("sidebarTicketsBtn").onclick = async () => { document.getElementById("sidebar").classList.remove("open"); await loadCustomerTickets(); document.getElementById("ticketsModal").style.display = "flex"; };
-    document.getElementById("closeModalBtn").onclick = () => document.getElementById("adminModal").style.display = "none";
-    document.getElementById("closeAdminPanelBtn").onclick = () => document.getElementById("adminModal").style.display = "none";
-    document.getElementById("closeTicketsModal").onclick = () => document.getElementById("ticketsModal").style.display = "none";
-    document.getElementById("closeChatModal").onclick = () => document.getElementById("chatModal").style.display = "none";
-    document.getElementById("checkPasswordBtn").onclick = () => { if(document.getElementById("adminPassword").value === ADMIN_PASSWORD) { document.getElementById("passwordScreen").style.display = "none"; document.getElementById("adminPanelScreen").style.display = "block"; loadAdminProducts(); loadAdminTickets(); } else alert("كلمة سر خاطئة"); };
-    document.getElementById("addProductBtn").onclick = addProduct;
+    window.onclick = (e) => { if(e.target.className === 'modal') closeModals(); };
+
     loadProducts();
 </script>
 </body>
