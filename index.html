@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Roblox Shop | متجر روبلوكس</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Tajawal', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0b1a2e 0%, #1a2a3a 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        /* header */
+        .header {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px);
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border-bottom: 1px solid #ffd966;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #ffd966, #ff9f4a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo p {
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+
+        .admin-panel-link {
+            background: #2c3e50;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+            border: 1px solid #ffd966;
+        }
+
+        .admin-panel-link:hover {
+            background: #e67e22;
+            color: white;
+            transform: scale(0.98);
+        }
+
+        /* container */
+        .container {
+            max-width: 1300px;
+            margin: 40px auto;
+            padding: 0 25px;
+        }
+
+        /* منتجات */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .product-card {
+            background: rgba(20, 35, 55, 0.8);
+            backdrop-filter: blur(4px);
+            border-radius: 28px;
+            padding: 18px;
+            transition: all 0.25s;
+            border: 1px solid rgba(255, 217, 102, 0.3);
+            text-align: center;
+        }
+
+        .product-card:hover {
+            transform: translateY(-7px);
+            border-color: #ffd966;
+            box-shadow: 0 20px 30px -12px black;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 20px;
+            background: #0f1a24;
+            margin-bottom: 15px;
+        }
+
+        .product-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin: 12px 0 5px;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd966;
+            margin: 8px 0;
+        }
+
+        .buy-btn {
+            background: #e67e22;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+        .buy-btn:hover {
+            background: #f39c12;
+            transform: scale(1.02);
+        }
+
+        /* modal الادارة */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #1e2a3a;
+            max-width: 550px;
+            width: 90%;
+            border-radius: 40px;
+            padding: 30px;
+            border-top: 5px solid #ffd966;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 18px;
+            border-radius: 60px;
+            border: none;
+            background: #2d3e4f;
+            color: white;
+            font-size: 1rem;
+        }
+
+        textarea {
+            border-radius: 24px;
+            resize: vertical;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .admin-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .admin-btn {
+            background: #27ae60;
+            padding: 12px;
+            border: none;
+            border-radius: 60px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .admin-btn.danger {
+            background: #c0392b;
+        }
+
+        .close-modal {
+            background: #7f8c8d;
+            margin-top: 15px;
+        }
+
+        .product-list-admin {
+            margin: 20px 0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .admin-product-item {
+            background: #0f1724;
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .delete-product {
+            background: #e74c3c;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .currency-select {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: #aaa;
+            padding: 40px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #aaa;
+        }
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">
+        <h1>🧸 Roblox Shop</h1>
+        <p>limited items & accounts</p>
+    </div>
+    <div class="admin-panel-link" id="openAdminBtn">🔐 لوحة الإدارة (Admin)</div>
+</div>
+
+<div class="container">
+    <h2>✨ أحدث المنتجات ✨</h2>
+    <div id="productsContainer" class="products-grid">
+        <!-- سيتم عرض المنتجات هنا ديناميكيا -->
+    </div>
+</div>
+
+<footer>
+    © 2025 Roblox Shop | جميع الأسعار بالدولار أو دينار أردني
+</footer>
+
+<!-- Modal كلمة السر + لوحة التحكم -->
+<div id="adminModal" class="modal">
+    <div class="modal-content">
+        <div id="passwordScreen">
+            <h2>🔐 دخول الإدارة</h2>
+            <label>كلمة السر:</label>
+            <input type="password" id="adminPassword" placeholder="••••••">
+            <button id="checkPasswordBtn" class="admin-btn">دخول</button>
+            <button id="closeModalBtn" class="admin-btn close-modal">إغلاق</button>
+        </div>
+
+        <div id="adminPanelScreen" style="display:none;">
+            <h2>⚙️ لوحة تحكم المتجر</h2>
+            <label>🏷️ اسم المنتج</label>
+            <input type="text" id="productName" placeholder="مثلاً: Limited Dragon">
+
+            <label>🖼️ رابط الصورة (URL)</label>
+            <input type="text" id="productImage" placeholder="https://example.com/robloxitem.png">
+
+            <label>💰 السعر</label>
+            <input type="number" id="productPrice" placeholder="10">
+
+            <label>💵 العملة</label>
+            <div class="currency-select">
+                <select id="productCurrency">
+                    <option value="$">دولار ($)</option>
+                    <option value="JD">دينار أردني (JD)</option>
+                </select>
+            </div>
+
+            <div class="admin-buttons">
+                <button id="addProductBtn" class="admin-btn">➕ إضافة منتج</button>
+            </div>
+
+            <hr style="margin: 25px 0; border-color:#2c3e50;">
+            <h3>📦 إدارة المنتجات الحالية</h3>
+            <div id="adminProductsList" class="product-list-admin">
+                <!-- قائمة المنتجات مع زر حذف -->
+            </div>
+            <button id="closeAdminPanelBtn" class="admin-btn close-modal">إغلاق الإدارة</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // === تخزين المنتجات في localStorage ===
+    let products = [];
+
+    // كلمة السر الثابتة للإدارة
+    const ADMIN_PASSWORD = "admin123";  // يمكنك تغييرها
+
+    // تحميل المنتجات المخزنة
+    function loadProductsFromStorage() {
+        const stored = localStorage.getItem("roblox_shop_products");
+        if(stored) {
+            products = JSON.parse(stored);
+        } else {
+            // منتجات تجريبية أولية
+            products = [
+                { id: Date.now()+1, name: "عملاق Robux 100k", image: "https://picsum.photos/id/104/300/200", price: 19.99, currency: "$" },
+                { id: Date.now()+2, name: "حساب نادر (Limited UGC)", image: "https://picsum.photos/id/106/300/200", price: 45, currency: "JD" },
+                { id: Date.now()+3, name: "قبعة مميزة Valkyrie", image: "https://picsum.photos/id/26/300/200", price: 89, currency: "$" }
+            ];
+            saveProductsToStorage();
+        }
+        renderAllProducts();
+    }
+
+    function saveProductsToStorage() {
+        localStorage.setItem("roblox_shop_products", JSON.stringify(products));
+    }
+
+    // عرض المنتجات للزبائن
+    function renderAllProducts() {
+        const container = document.getElementById("productsContainer");
+        if(!container) return;
+        if(products.length === 0) {
+            container.innerHTML = `<div class="empty-msg">⚠️ لا توجد منتجات حاليًا، يرجى العودة لاحقًا.</div>`;
+            return;
+        }
+        container.innerHTML = products.map(product => `
+            <div class="product-card">
+                <img class="product-img" src="${product.image}" alt="${product.name}" onerror="this.src='https://picsum.photos/id/20/300/200'">
+                <div class="product-title">${escapeHtml(product.name)}</div>
+                <div class="product-price">${product.currency} ${product.price}</div>
+                <button class="buy-btn" data-id="${product.id}">🛒 شراء الآن</button>
+            </div>
+        `).join("");
+
+        // إضافة حدث لكل أزرار الشراء
+        document.querySelectorAll('.buy-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(btn.getAttribute('data-id'));
+                const product = products.find(p => p.id === id);
+                if(product) {
+                    alert(`✅ تم إضافة "${product.name}" إلى السلة (محاكاة).\nالسعر: ${product.currency} ${product.price}\nللشراء الحقيقي تواصل مع الدعم.`);
+                }
+            });
+        });
+    }
+
+    // عرض المنتجات في لوحة الإدارة (مع حذف)
+    function renderAdminProductList() {
+        const adminListDiv = document.getElementById("adminProductsList");
+        if(!adminListDiv) return;
+        if(products.length === 0) {
+            adminListDiv.innerHTML = `<div class="empty-msg">لا توجد منتجات، أضف منتجًا جديدًا</div>`;
+            return;
+        }
+        adminListDiv.innerHTML = products.map(product => `
+            <div class="admin-product-item">
+                <span><strong>${escapeHtml(product.name)}</strong> - ${product.currency} ${product.price}</span>
+                <button class="delete-product" data-id="${product.id}">🗑️ حذف</button>
+            </div>
+        `).join("");
+
+        // اضافة حدث الحذف
+        document.querySelectorAll('.delete-product').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(btn.getAttribute('data-id'));
+                deleteProductById(id);
+            });
+        });
+    }
+
+    function deleteProductById(id) {
+        products = products.filter(p => p.id !== id);
+        saveProductsToStorage();
+        renderAllProducts();
+        renderAdminProductList();
+    }
+
+    function addNewProduct() {
+        const name = document.getElementById("productName").value.trim();
+        const image = document.getElementById("productImage").value.trim();
+        let price = parseFloat(document.getElementById("productPrice").value);
+        const currency = document.getElementById("productCurrency").value;
+
+        if(!name) { alert("يرجى كتابة اسم المنتج"); return; }
+        if(isNaN(price) || price <= 0) { alert("سعر صالح من فضلك"); return; }
+        let finalImage = image;
+        if(!finalImage) finalImage = "https://picsum.photos/id/100/300/200";
+
+        const newProduct = {
+            id: Date.now(),
+            name: name,
+            image: finalImage,
+            price: price,
+            currency: currency
+        };
+        products.push(newProduct);
+        saveProductsToStorage();
+        renderAllProducts();
+        renderAdminProductList();
+
+        // تفريغ الحقول
+        document.getElementById("productName").value = "";
+        document.getElementById("productImage").value = "";
+        document.getElementById("productPrice").value = "";
+    }
+
+    function escapeHtml(str) {
+        if(!str) return "";
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // ----- ادارة النوافذ وكلمة المرور -----
+    const modal = document.getElementById("adminModal");
+    const passwordScreen = document.getElementById("passwordScreen");
+    const adminPanelScreen = document.getElementById("adminPanelScreen");
+    const openAdminBtn = document.getElementById("openAdminBtn");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const checkPasswordBtn = document.getElementById("checkPasswordBtn");
+    const addProductBtn = document.getElementById("addProductBtn");
+    const closeAdminPanelBtn = document.getElementById("closeAdminPanelBtn");
+
+    function showPasswordScreen() {
+        passwordScreen.style.display = "block";
+        adminPanelScreen.style.display = "none";
+        document.getElementById("adminPassword").value = "";
+    }
+
+    function showAdminPanel() {
+        passwordScreen.style.display = "none";
+        adminPanelScreen.style.display = "block";
+        renderAdminProductList();  // تحديث قائمة المنتجات للإدارة
+    }
+
+    function closeModalFunc() {
+        modal.style.display = "none";
+        showPasswordScreen(); // اعادة ضبط الشاشة
+    }
+
+    openAdminBtn.onclick = () => {
+        modal.style.display = "flex";
+        showPasswordScreen();
+    };
+
+    closeModalBtn.onclick = closeModalFunc;
+    closeAdminPanelBtn.onclick = closeModalFunc;
+
+    checkPasswordBtn.onclick = () => {
+        const enteredPass = document.getElementById("adminPassword").value;
+        if(enteredPass === ADMIN_PASSWORD) {
+            showAdminPanel();
+        } else {
+            alert("❌ كلمة سر خاطئة! لا يمكنك الدخول إلى لوحة الإدارة.");
+        }
+    };
+
+    // اضافة منتج من لوحة الادارة
+    addProductBtn.onclick = () => {
+        addNewProduct();
+    };
+
+    // اغلاق المودال عند الضغط خارج المحتوى
+    window.onclick = (e) => {
+        if(e.target === modal) {
+            closeModalFunc();
+        }
+    };
+
+    // تهيئة الموقع
+    loadProductsFromStorage();
+</script>
+</body>
+  </html>
