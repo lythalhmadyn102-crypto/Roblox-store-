@@ -18,19 +18,99 @@
             color: #fff;
         }
 
+        /* القائمة الجانبية */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: rgba(10, 20, 35, 0.98);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.5);
+            border-right: 1px solid #ffd966;
+            padding: 80px 20px 30px;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar .close-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #ffd966;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 15px 20px;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover {
+            background: #e67e22;
+            transform: translateX(5px);
+        }
+
+        /* زر القائمة (ثلاث خطوط) */
+        .menu-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #ffd966;
+            color: #1a2a3a;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: 0.2s;
+        }
+
+        .menu-btn:hover {
+            background: #ff9f4a;
+            transform: scale(1.05);
+        }
+
+        .menu-btn span {
+            width: 25px;
+            height: 3px;
+            background: #1a2a3a;
+            border-radius: 3px;
+        }
+
         .header {
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(12px);
             padding: 18px 30px;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
             border-bottom: 1px solid #ffd966;
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 99;
         }
 
         .logo {
@@ -57,25 +137,6 @@
         .logo p {
             font-size: 0.8rem;
             color: #ccc;
-        }
-
-        .admin-panel-link, .tickets-link {
-            background: #2c3e50;
-            padding: 8px 20px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
-            border: 1px solid #ffd966;
-        }
-
-        .tickets-link {
-            background: #1e5f3a;
-        }
-
-        .admin-panel-link:hover, .tickets-link:hover {
-            background: #e67e22;
-            transform: scale(0.98);
         }
 
         .container {
@@ -150,7 +211,7 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(6px);
-            z-index: 1000;
+            z-index: 1100;
             justify-content: center;
             align-items: center;
         }
@@ -212,7 +273,8 @@
         }
 
         .ticket-item:hover {
-            background: #1e2a3a;
+            background: #2c3e50;
+            transform: scale(1.01);
         }
 
         .chat-area {
@@ -292,17 +354,28 @@
 </head>
 <body>
 
+<!-- زر القائمة (ثلاث خطوط) -->
+<div class="menu-btn" id="menuBtn">
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+
+<!-- القائمة الجانبية -->
+<div class="sidebar" id="sidebar">
+    <div class="close-btn" id="closeSidebar">✕</div>
+    <a id="sidebarAdminBtn">🔐 لوحة الإدارة</a>
+    <a id="sidebarTicketsBtn">🎫 تذاكري</a>
+</div>
+
 <div class="header">
     <div class="logo">
-        <img src="1000029223.png" alt="LAITH STORE" onerror="this.src='https://picsum.photos/id/104/100/100'">
+        <!-- صورتك من Discord -->
+        <img src="https://cdn.discordapp.com/attachments/1478031378129096925/1501659062515798108/1778077435647.png" alt="LAITH STORE" onerror="this.src='https://picsum.photos/id/104/100/100'">
         <div>
             <h1>ليث شتوق | LAITH STORE</h1>
             <p>متجر روبلوكس - نظام تذاكر</p>
         </div>
-    </div>
-    <div style="display: flex; gap: 10px;">
-        <div class="tickets-link" id="myTicketsBtn">🎫 تذاكري</div>
-        <div class="admin-panel-link" id="openAdminBtn">🔐 الإدارة</div>
     </div>
 </div>
 
@@ -313,7 +386,7 @@
 
 <footer>© 2025 LAITH STORE | اضغط شراء لفتح تذكرة والدعم يرد عليك</footer>
 
-<!-- مودال التذاكر للزبون -->
+<!-- مودال التذاكر -->
 <div id="ticketsModal" class="modal">
     <div class="modal-content">
         <h2>🎫 تذاكري</h2>
@@ -358,19 +431,14 @@
             <label>السعر</label>
             <input type="number" id="productPrice" placeholder="10">
             <label>العملة</label>
-            <select id="productCurrency">
-                <option value="$">دولار ($)</option>
-                <option value="JD">دينار أردني (JD)</option>
-            </select>
+            <select id="productCurrency"><option value="$">دولار ($)</option><option value="JD">دينار أردني (JD)</option></select>
             <button id="addProductBtn" class="admin-btn">➕ إضافة منتج</button>
 
             <hr style="margin: 25px 0;">
-
             <h3 class="section-title">📦 قائمة المنتجات (اضغط حذف لإزالته)</h3>
             <div id="adminProductsList"></div>
 
             <hr style="margin: 25px 0;">
-
             <h3 class="section-title">📩 تذاكر الدعم (كل الزبائن)</h3>
             <div id="adminTicketsList"></div>
             
@@ -380,11 +448,8 @@
 </div>
 
 <script>
-    // ---------- المنتجات ----------
     let products = [];
     const ADMIN_PASSWORD = "8899916710";
-
-    // ---------- التذاكر ----------
     let tickets = [];
     let currentCustomerId = null;
     let currentOpenTicket = null;
@@ -392,7 +457,7 @@
     function loadData() {
         const storedProducts = localStorage.getItem("roblox_shop_products");
         if(storedProducts) products = JSON.parse(storedProducts);
-        else products = [];  // بدون منتجات تجريبية
+        else products = [];
 
         const storedTickets = localStorage.getItem("roblox_tickets");
         if(storedTickets) tickets = JSON.parse(storedTickets);
@@ -404,7 +469,6 @@
             localStorage.setItem("customer_id", customerId);
         }
         currentCustomerId = customerId;
-
         renderProducts();
     }
 
@@ -435,30 +499,20 @@
         });
     }
 
-    // عرض المنتجات في لوحة الإدارة مع زر حذف
     function renderAdminProductsList() {
         const container = document.getElementById("adminProductsList");
         if(!container) return;
-        if(products.length === 0) {
-            container.innerHTML = "<div class='empty-msg'>لا توجد منتجات. أضف منتجاً جديداً.</div>";
-            return;
-        }
+        if(products.length === 0) { container.innerHTML = "<div class='empty-msg'>لا توجد منتجات. أضف منتجاً جديداً.</div>"; return; }
         container.innerHTML = products.map(p => `
             <div class="product-item-admin">
-                <div>
-                    <strong>${escapeHtml(p.name)}</strong><br>
-                    <small>${p.currency} ${p.price}</small>
-                </div>
+                <div><strong>${escapeHtml(p.name)}</strong><br><small>${p.currency} ${p.price}</small></div>
                 <button class="delete-product-btn" data-id="${p.id}">🗑️ حذف المنتج</button>
             </div>
         `).join("");
-        
         document.querySelectorAll('.delete-product-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const id = parseInt(btn.getAttribute('data-id'));
-                if(confirm("هل أنت متأكد من حذف هذا المنتج نهائياً؟")) {
-                    deleteProductById(id);
-                }
+                if(confirm("هل أنت متأكد من حذف هذا المنتج نهائياً؟")) deleteProductById(id);
             });
         });
     }
@@ -473,24 +527,16 @@
 
     function createTicket(productId, productName) {
         const existingIndex = tickets.findIndex(t => t.customerId === currentCustomerId && t.productId === productId);
-        if(existingIndex !== -1) {
-            tickets.splice(existingIndex, 1);
-        }
+        if(existingIndex !== -1) tickets.splice(existingIndex, 1);
         
         const newTicket = {
             id: Date.now(),
-            productId: productId,
-            productName: productName,
-            customerId: currentCustomerId,
-            messages: [{
-                sender: "system",
-                text: `✅ تم إنشاء تذكرة للمنتج: ${productName}. يمكنك الآن التواصل مع الدعم.`,
-                timestamp: new Date().toISOString()
-            }]
+            productId, productName, customerId: currentCustomerId,
+            messages: [{ sender: "system", text: `✅ تم إنشاء تذكرة للمنتج: ${productName}.`, timestamp: new Date().toISOString() }]
         };
         tickets.push(newTicket);
         saveTickets();
-        alert(`🎫 تم فتح تذكرة للمنتج "${productName}". يمكنك المحادثة الآن.`);
+        alert(`🎫 تم فتح تذكرة للمنتج "${productName}".`);
         openChatModal(newTicket.id, false);
     }
 
@@ -537,18 +583,9 @@
         if(!container) return;
         if(ticket.messages.length === 0) { container.innerHTML = "<div>لا توجد رسائل بعد</div>"; return; }
         container.innerHTML = ticket.messages.map(msg => {
-            let senderClass = "";
-            if(msg.sender === 'customer') senderClass = 'customer';
-            else if(msg.sender === 'admin') senderClass = 'admin';
-            else senderClass = 'system';
+            let senderClass = msg.sender === 'customer' ? 'customer' : (msg.sender === 'admin' ? 'admin' : 'system');
             let senderName = msg.sender === 'customer' ? '👤 أنت' : (msg.sender === 'admin' ? '🛡️ الإدارة' : '📢 نظام');
-            return `
-                <div class="message ${senderClass}">
-                    <strong>${senderName}</strong><br>
-                    ${escapeHtml(msg.text)}<br>
-                    <small style="font-size:10px;">${new Date(msg.timestamp).toLocaleTimeString()}</small>
-                </div>
-            `;
+            return `<div class="message ${senderClass}"><strong>${senderName}</strong><br>${escapeHtml(msg.text)}<br><small>${new Date(msg.timestamp).toLocaleTimeString()}</small></div>`;
         }).join("");
         container.scrollTop = container.scrollHeight;
     }
@@ -557,11 +594,7 @@
         if(!text.trim()) return;
         const ticket = tickets.find(t => t.id === ticketId);
         if(!ticket) return;
-        ticket.messages.push({
-            sender: sender,
-            text: text.trim(),
-            timestamp: new Date().toISOString()
-        });
+        ticket.messages.push({ sender, text: text.trim(), timestamp: new Date().toISOString() });
         saveTickets();
         renderChatMessages(ticketId);
         renderCustomerTicketsList();
@@ -573,13 +606,7 @@
         if(!container) return;
         const myTickets = tickets.filter(t => t.customerId === currentCustomerId);
         if(myTickets.length === 0) { container.innerHTML = "<div class='empty-msg'>لا توجد تذاكر. اشتري منتجًا لفتح تذكرة.</div>"; return; }
-        container.innerHTML = myTickets.map(t => `
-            <div class="ticket-item" data-id="${t.id}">
-                <strong>📦 ${escapeHtml(t.productName)}</strong><br>
-                رسائل: ${t.messages.length}<br>
-                <small>آخر رسالة: ${t.messages.length > 0 ? new Date(t.messages[t.messages.length-1].timestamp).toLocaleString() : "جديدة"}</small>
-            </div>
-        `).join("");
+        container.innerHTML = myTickets.map(t => `<div class="ticket-item" data-id="${t.id}"><strong>📦 ${escapeHtml(t.productName)}</strong><br>رسائل: ${t.messages.length}</div>`).join("");
         document.querySelectorAll("#customerTicketsList .ticket-item").forEach(el => {
             el.addEventListener("click", () => openChatModal(parseInt(el.getAttribute("data-id")), false));
         });
@@ -591,96 +618,71 @@
         if(tickets.length === 0) { container.innerHTML = "<div class='empty-msg'>لا توجد تذاكر حالياً</div>"; return; }
         container.innerHTML = tickets.map(t => `
             <div class="ticket-item" data-id="${t.id}">
-                <strong>📦 ${escapeHtml(t.productName)}</strong><br>
-                الزبون: ${t.customerId.substring(0,15)}... | رسائل: ${t.messages.length}<br>
+                <strong>📦 ${escapeHtml(t.productName)}</strong><br>الزبون: ${t.customerId.substring(0,15)}... | رسائل: ${t.messages.length}
                 <div style="display:flex; gap:10px; margin-top:8px;">
-                    <button class="admin-btn" style="background:#3498db;" onclick="event.stopPropagation(); adminOpenTicket(${t.id})">💬 رد</button>
-                    <button class="admin-btn danger" style="background:#c0392b;" onclick="event.stopPropagation(); adminDeleteTicket(${t.id})">🗑️ حذف كامل</button>
+                    <button class="admin-btn" style="background:#3498db;" onclick="adminOpenTicket(${t.id})">💬 رد</button>
+                    <button class="admin-btn danger" style="background:#c0392b;" onclick="adminDeleteTicket(${t.id})">🗑️ حذف كامل</button>
                 </div>
             </div>
         `).join("");
         document.querySelectorAll("#adminTicketsList .ticket-item").forEach(el => {
-            el.addEventListener("click", (e) => {
-                if(e.target.tagName !== 'BUTTON') adminOpenTicket(parseInt(el.getAttribute("data-id")));
-            });
+            el.addEventListener("click", (e) => { if(e.target.tagName !== 'BUTTON') adminOpenTicket(parseInt(el.getAttribute("data-id"))); });
         });
     }
 
     window.adminOpenTicket = (ticketId) => { openChatModal(ticketId, true); };
     window.adminDeleteTicket = (ticketId) => { if(confirm("حذف التذكرة نهائياً؟")) deleteTicketCompletely(ticketId); };
 
-    // إضافة منتج جديد
     function addNewProduct() {
         const name = document.getElementById("productName").value.trim();
         const image = document.getElementById("productImage").value.trim();
         const price = parseFloat(document.getElementById("productPrice").value);
         const currency = document.getElementById("productCurrency").value;
-
-        if(!name) { alert("يرجى كتابة اسم المنتج"); return; }
-        if(isNaN(price) || price <= 0) { alert("يرجى كتابة سعر صحيح"); return; }
-        
-        const finalImage = image || "https://picsum.photos/id/100/300/200";
-        
-        const newProduct = {
-            id: Date.now(),
-            name: name,
-            image: finalImage,
-            price: price,
-            currency: currency
-        };
-        products.push(newProduct);
+        if(!name || isNaN(price) || price <= 0) { alert("يرجى ملء البيانات بشكل صحيح"); return; }
+        products.push({ id: Date.now(), name, image: image || "https://picsum.photos/id/100/300/200", price, currency });
         saveProducts();
         renderProducts();
         renderAdminProductsList();
-        
         document.getElementById("productName").value = "";
         document.getElementById("productImage").value = "";
         document.getElementById("productPrice").value = "";
-        alert("✅ تم إضافة المنتج بنجاح");
+        alert("✅ تم إضافة المنتج");
     }
 
-    // إدارة المودالات
+    // القائمة الجانبية
+    const sidebar = document.getElementById("sidebar");
+    const menuBtn = document.getElementById("menuBtn");
+    const closeSidebar = document.getElementById("closeSidebar");
+    menuBtn.onclick = () => sidebar.classList.add("open");
+    closeSidebar.onclick = () => sidebar.classList.remove("open");
+    document.getElementById("sidebarAdminBtn").onclick = () => { sidebar.classList.remove("open"); document.getElementById("adminModal").style.display = "flex"; showPasswordScreen(); };
+    document.getElementById("sidebarTicketsBtn").onclick = () => { sidebar.classList.remove("open"); renderCustomerTicketsList(); document.getElementById("ticketsModal").style.display = "flex"; };
+
+    // المودالات
     const adminModal = document.getElementById("adminModal");
     const ticketsModal = document.getElementById("ticketsModal");
     const chatModal = document.getElementById("chatModal");
-
-    document.getElementById("myTicketsBtn").onclick = () => { renderCustomerTicketsList(); ticketsModal.style.display = "flex"; };
     document.getElementById("closeTicketsModal").onclick = () => ticketsModal.style.display = "none";
     document.getElementById("closeChatModal").onclick = () => chatModal.style.display = "none";
     document.getElementById("sendMessageBtn").onclick = () => {
         if(!currentOpenTicket) return;
         const input = document.getElementById("chatMessageInput");
         const isAdminView = (document.getElementById("adminPanelScreen")?.style.display === "block");
-        const sender = isAdminView ? "admin" : "customer";
-        sendMessage(currentOpenTicket.id, input.value, sender);
+        sendMessage(currentOpenTicket.id, input.value, isAdminView ? "admin" : "customer");
         input.value = "";
     };
-    
-    document.getElementById("openAdminBtn").onclick = () => { adminModal.style.display = "flex"; showPasswordScreen(); };
     document.getElementById("closeModalBtn").onclick = () => adminModal.style.display = "none";
     document.getElementById("closeAdminPanelBtn").onclick = () => adminModal.style.display = "none";
     document.getElementById("checkPasswordBtn").onclick = () => {
-        if(document.getElementById("adminPassword").value === ADMIN_PASSWORD) { 
-            showAdminPanel(); 
-            renderAdminTicketsList();
-            renderAdminProductsList();
-        }
+        if(document.getElementById("adminPassword").value === ADMIN_PASSWORD) { showAdminPanel(); renderAdminTicketsList(); renderAdminProductsList(); }
         else alert("❌ كلمة سر خاطئة");
     };
-    document.getElementById("addProductBtn").onclick = () => { addNewProduct(); };
-
+    document.getElementById("addProductBtn").onclick = () => addNewProduct();
     function showPasswordScreen() { document.getElementById("passwordScreen").style.display = "block"; document.getElementById("adminPanelScreen").style.display = "none"; }
     function showAdminPanel() { document.getElementById("passwordScreen").style.display = "none"; document.getElementById("adminPanelScreen").style.display = "block"; }
-
-    window.onclick = (e) => { 
-        if(e.target === adminModal) adminModal.style.display = "none"; 
-        if(e.target === ticketsModal) ticketsModal.style.display = "none"; 
-        if(e.target === chatModal) chatModal.style.display = "none"; 
-    };
-    
+    window.onclick = (e) => { if(e.target === adminModal) adminModal.style.display = "none"; if(e.target === ticketsModal) ticketsModal.style.display = "none"; if(e.target === chatModal) chatModal.style.display = "none"; };
     function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
-
     loadData();
 </script>
 </body>
-            </html>
+    </html>
