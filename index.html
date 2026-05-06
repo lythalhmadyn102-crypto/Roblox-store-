@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LAITH STORE | متجر روبلوكس</title>
+    <title>ليث ستور | متجر روبلوكس</title>
     <style>
         * {
             margin: 0;
@@ -18,7 +18,6 @@
             color: #fff;
         }
 
-        /* القائمة الجانبية */
         .sidebar {
             position: fixed;
             top: 0;
@@ -65,7 +64,6 @@
             transform: translateX(5px);
         }
 
-        /* زر القائمة (ثلاث خطوط) */
         .menu-btn {
             position: fixed;
             top: 20px;
@@ -221,7 +219,7 @@
             max-width: 700px;
             width: 90%;
             border-radius: 40px;
-            padding: 30px;
+            padding: 35px;
             border-top: 5px solid #ffd966;
             max-height: 85vh;
             overflow-y: auto;
@@ -350,18 +348,26 @@
             border-right: 4px solid #ffd966;
             padding-right: 12px;
         }
+
+        /* تحسينات للجوال */
+        @media (max-width: 600px) {
+            .logo h1 {
+                font-size: 1.2rem;
+            }
+            .logo img {
+                height: 45px;
+            }
+        }
     </style>
 </head>
 <body>
 
-<!-- زر القائمة (ثلاث خطوط) -->
 <div class="menu-btn" id="menuBtn">
     <span></span>
     <span></span>
     <span></span>
 </div>
 
-<!-- القائمة الجانبية -->
 <div class="sidebar" id="sidebar">
     <div class="close-btn" id="closeSidebar">✕</div>
     <a id="sidebarAdminBtn">🔐 لوحة الإدارة</a>
@@ -370,10 +376,9 @@
 
 <div class="header">
     <div class="logo">
-        <!-- صورتك من Discord -->
-        <img src="https://cdn.discordapp.com/attachments/1478031378129096925/1501659062515798108/1778077435647.png" alt="LAITH STORE" onerror="this.src='https://picsum.photos/id/104/100/100'">
+        <img src="https://cdn.discordapp.com/attachments/1478031378129096925/1501659062515798108/1778077435647.png" alt="ليث ستور" onerror="this.src='https://picsum.photos/id/104/100/100'">
         <div>
-            <h1>ليث شتوق | LAITH STORE</h1>
+            <h1>ليث ستور</h1>
             <p>متجر روبلوكس - نظام تذاكر</p>
         </div>
     </div>
@@ -384,9 +389,8 @@
     <div id="productsContainer" class="products-grid"></div>
 </div>
 
-<footer>© 2025 LAITH STORE | اضغط شراء لفتح تذكرة والدعم يرد عليك</footer>
+<footer>© 2025 ليث ستور | اضغط شراء لفتح تذكرة والدعم يرد عليك</footer>
 
-<!-- مودال التذاكر -->
 <div id="ticketsModal" class="modal">
     <div class="modal-content">
         <h2>🎫 تذاكري</h2>
@@ -395,7 +399,6 @@
     </div>
 </div>
 
-<!-- مودال المحادثة -->
 <div id="chatModal" class="modal">
     <div class="modal-content">
         <h2 id="chatTitle">محادثة التذكرة</h2>
@@ -409,7 +412,6 @@
     </div>
 </div>
 
-<!-- مودال الإدارة -->
 <div id="adminModal" class="modal">
     <div class="modal-content">
         <div id="passwordScreen">
@@ -421,7 +423,7 @@
         </div>
 
         <div id="adminPanelScreen" style="display:none;">
-            <h2>⚙️ لوحة التحكم - LAITH STORE</h2>
+            <h2>⚙️ لوحة التحكم - ليث ستور</h2>
             
             <h3 class="section-title">➕ إضافة منتج جديد</h3>
             <label>اسم المنتج</label>
@@ -649,7 +651,6 @@
         alert("✅ تم إضافة المنتج");
     }
 
-    // القائمة الجانبية
     const sidebar = document.getElementById("sidebar");
     const menuBtn = document.getElementById("menuBtn");
     const closeSidebar = document.getElementById("closeSidebar");
@@ -658,7 +659,6 @@
     document.getElementById("sidebarAdminBtn").onclick = () => { sidebar.classList.remove("open"); document.getElementById("adminModal").style.display = "flex"; showPasswordScreen(); };
     document.getElementById("sidebarTicketsBtn").onclick = () => { sidebar.classList.remove("open"); renderCustomerTicketsList(); document.getElementById("ticketsModal").style.display = "flex"; };
 
-    // المودالات
     const adminModal = document.getElementById("adminModal");
     const ticketsModal = document.getElementById("ticketsModal");
     const chatModal = document.getElementById("chatModal");
