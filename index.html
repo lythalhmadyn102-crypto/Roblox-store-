@@ -4,344 +4,181 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ليث ستور | متجر روبلوكس</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // إعدادات Firebase الخاصة بك
+        const firebaseConfig = {
+            apiKey: "AIzaSyAXtokP1H6D8iLUMrXVM_XnmyZgp5oQE7c",
+            authDomain: "laith-store-eaa2e.firebaseapp.com",
+            projectId: "laith-store-eaa2e",
+            storageBucket: "laith-store-eaa2e.firebasestorage.app",
+            messagingSenderId: "694876857460",
+            appId: "1:694876857460:web:dad3e4832b429b04569d21",
+            measurementId: "G-3V72YTDGD9"
+        };
+
+        // تشغيل Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // جعل الوظائف متاحة عالمياً للكود
+        window.db = db;
+        window.dbUtils = { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp };
+    </script>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', 'Tajawal', system-ui, sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #0b1a2e 0%, #1a2a3a 100%);
-            min-height: 100vh;
-            color: #fff;
-        }
-
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: -280px;
-            width: 280px;
-            height: 100%;
-            background: rgba(10, 20, 35, 0.98);
-            backdrop-filter: blur(15px);
-            z-index: 1000;
-            transition: left 0.3s ease;
-            box-shadow: 2px 0 20px rgba(0,0,0,0.5);
-            border-right: 1px solid #ffd966;
-            padding: 80px 20px 30px;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, #0b1a2e 0%, #1a2a3a 100%); min-height: 100vh; color: #fff; }
+        .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: rgba(10, 20, 35, 0.98); backdrop-filter: blur(15px); z-index: 1000; transition: 0.3s; box-shadow: 2px 0 20px rgba(0,0,0,0.5); border-right: 1px solid #ffd966; padding: 80px 20px 30px; }
         .sidebar.open { left: 0; }
-
-        .sidebar .close-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 28px;
-            cursor: pointer;
-            color: #ffd966;
-        }
-
-        .sidebar a {
-            display: block;
-            padding: 15px 20px;
-            margin: 10px 0;
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            transition: 0.2s;
-            cursor: pointer;
-        }
-
-        .sidebar a:hover {
-            background: #e67e22;
-            transform: translateX(5px);
-        }
-
-        .menu-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: #ffd966;
-            color: #1a2a3a;
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            z-index: 1001;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-
-        .menu-btn span {
-            width: 25px;
-            height: 3px;
-            background: #1a2a3a;
-            border-radius: 3px;
-        }
-
-        .header {
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(12px);
-            padding: 18px 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-bottom: 1px solid #ffd966;
-            position: sticky;
-            top: 0;
-            z-index: 99;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo img {
-            height: 60px;
-            width: 60px;
-            border-radius: 15px;
-            object-fit: cover;
-        }
-
-        .logo h1 {
-            font-size: 1.5rem;
-            background: linear-gradient(135deg, #ffd966, #ff9f4a);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .container {
-            max-width: 1300px;
-            margin: 40px auto;
-            padding: 0 25px;
-        }
-
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-            gap: 30px;
-            margin-top: 30px;
-        }
-
-        .product-card {
-            background: rgba(20, 35, 55, 0.8);
-            backdrop-filter: blur(4px);
-            border-radius: 28px;
-            padding: 18px;
-            transition: all 0.25s;
-            border: 1px solid rgba(255, 217, 102, 0.3);
-            text-align: center;
-        }
-
-        .product-img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 20px;
-            margin-bottom: 15px;
-        }
-
-        .buy-btn {
-            background: #e67e22;
-            border: none;
-            color: white;
-            padding: 12px;
-            border-radius: 60px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1100;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: #1e2a3a;
-            max-width: 600px;
-            width: 90%;
-            border-radius: 30px;
-            padding: 30px;
-            border-top: 5px solid #ffd966;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 10px;
-            border: none;
-            background: #2d3e4f;
-            color: white;
-        }
-
-        .admin-btn {
-            background: #27ae60;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            color: white;
-            cursor: pointer;
-            width: 100%;
-        }
-
+        .sidebar .close-btn { position: absolute; top: 20px; left: 20px; font-size: 28px; cursor: pointer; color: #ffd966; }
+        .sidebar a { display: block; padding: 15px 20px; margin: 10px 0; background: rgba(255,255,255,0.1); border-radius: 15px; color: white; text-decoration: none; font-weight: bold; transition: 0.2s; cursor: pointer; }
+        .sidebar a:hover { background: #e67e22; transform: translateX(5px); }
+        .menu-btn { position: fixed; top: 20px; left: 20px; background: #ffd966; color: #1a2a3a; width: 45px; height: 45px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; cursor: pointer; z-index: 1001; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: 0.2s; }
+        .menu-btn:hover { background: #ff9f4a; transform: scale(1.05); }
+        .menu-btn span { width: 25px; height: 3px; background: #1a2a3a; border-radius: 3px; }
+        .header { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(12px); padding: 18px 30px; display: flex; justify-content: center; align-items: center; border-bottom: 1px solid #ffd966; position: sticky; top: 0; z-index: 99; }
+        .logo { display: flex; align-items: center; gap: 15px; }
+        .logo img { height: 60px; border-radius: 15px; }
+        .logo h1 { font-size: 1.5rem; background: linear-gradient(135deg, #ffd966, #ff9f4a); -webkit-background-clip: text; color: transparent; }
+        .container { max-width: 1300px; margin: 40px auto; padding: 0 25px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 30px; }
+        .product-card { background: rgba(20, 35, 55, 0.8); border-radius: 28px; padding: 18px; border: 1px solid rgba(255, 217, 102, 0.3); text-align: center; transition: 0.25s; }
+        .product-card:hover { transform: translateY(-7px); border-color: #ffd966; box-shadow: 0 20px 30px -12px black; }
+        .product-img { width: 100%; height: 180px; object-fit: cover; border-radius: 20px; background: #0f1a24; margin-bottom: 15px; }
+        .product-title { font-size: 1.4rem; font-weight: bold; margin: 10px 0; }
+        .product-desc { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; min-height: 40px; }
+        .product-price { font-size: 1.5rem; color: #ffd966; font-weight: bold; margin-bottom: 15px; }
+        .buy-btn { background: #e67e22; border: none; color: white; padding: 12px; border-radius: 60px; font-weight: bold; cursor: pointer; width: 100%; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px); z-index: 1100; justify-content: center; align-items: center; }
+        .modal-content { background: #1e2a3a; width: 90%; max-width: 700px; border-radius: 40px; padding: 35px; border-top: 5px solid #ffd966; max-height: 85vh; overflow-y: auto; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 60px; border: none; background: #2d3e4f; color: white; }
+        textarea { border-radius: 20px; }
+        .admin-btn { background: #27ae60; padding: 12px; border: none; border-radius: 60px; color: white; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
         .admin-btn.danger { background: #c0392b; }
-
-        .chat-area {
-            max-height: 300px;
-            overflow-y: auto;
-            background: #0f1724;
-            border-radius: 15px;
-            padding: 15px;
-        }
-
-        .message { margin: 10px 0; padding: 10px; border-radius: 10px; }
-        .message.customer { background: #2c3e50; text-align: right; }
-        .message.admin { background: #e67e22; }
+        .section-title { margin: 20px 0 10px; border-right: 4px solid #ffd966; padding-right: 12px; }
+        .ticket-item { background: #0f1724; padding: 15px; border-radius: 20px; margin: 10px 0; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="menu-btn" id="menuBtn"><span></span><span></span><span></span></div>
-
 <div class="sidebar" id="sidebar">
     <div class="close-btn" id="closeSidebar">✕</div>
-    <a id="sidebarAdminBtn">🔐 لوحة الإدارة</a>
-    <a id="sidebarTicketsBtn">🎫 تذاكري</a>
+    <a onclick="openAdmin()">🔐 لوحة الإدارة</a>
 </div>
 
 <div class="header">
     <div class="logo">
-        <img src="https://cdn.discordapp.com/attachments/1478031378129096925/1501659062515798108/1778077435647.png" alt="ليث ستور">
-        <h1>ليث ستور</h1>
+        <img src="https://cdn.discordapp.com/attachments/1478031378129096925/1501659062515798108/1778077435647.png?ex=69fce07b&is=69fb8efb&hm=7c17303c1f192092be6cf072a001026b2094a8452d06825e6123d643205fd090&" alt="ليث ستور">
+        <div><h1>ليث ستور</h1><p>متجر روبلوكس سحابي</p></div>
     </div>
 </div>
 
 <div class="container">
-    <h2>✨ المنتجات المتاحة ✨</h2>
-    <div id="productsContainer" class="products-grid">جاري التحميل...</div>
+    <h2>✨ منتجات روبلوكس ✨</h2>
+    <div id="productsContainer" class="products-grid"></div>
 </div>
 
-<div id="ticketsModal" class="modal"><div class="modal-content"><h2>🎫 تذاكري</h2><div id="customerTicketsList"></div><button onclick="closeModals()" class="admin-btn">إغلاق</button></div></div>
-<div id="chatModal" class="modal"><div class="modal-content"><h2 id="chatTitle">المحادثة</h2><div id="chatMessages" class="chat-area"></div><textarea id="chatMessageInput" placeholder="رسالتك..."></textarea><button id="sendMessageBtn" class="admin-btn">إرسال</button><button id="closeChatBtn" class="admin-btn danger" style="margin-top:10px">إغلاق</button></div></div>
 <div id="adminModal" class="modal">
-    <div class="modal-content" id="adminContent">
-        <div id="passArea">
+    <div class="modal-content">
+        <div id="passwordScreen">
+            <h2>🔐 دخول الإدارة</h2>
             <input type="password" id="adminPassword" placeholder="كلمة السر">
-            <button onclick="checkAdmin()" class="admin-btn">دخول</button>
+            <button onclick="checkPass()" class="admin-btn">دخول</button>
+            <button onclick="closeModals()" class="admin-btn danger">إغلاق</button>
         </div>
-        <div id="adminPanel" style="display:none">
-            <h3>➕ أضف منتج للجميع</h3>
-            <input type="text" id="pName" placeholder="اسم المنتج">
+        <div id="adminPanel" style="display:none;">
+            <h2>⚙️ لوحة التحكم</h2>
+            <input type="text" id="pName" placeholder="الاسم">
+            <textarea id="pDesc" placeholder="الوصف"></textarea>
             <input type="text" id="pImg" placeholder="رابط الصورة">
             <input type="number" id="pPrice" placeholder="السعر">
-            <button onclick="addProduct()" class="admin-btn">نشر المنتج للكل 🚀</button>
-            <hr><div id="adminProductsList"></div>
+            <select id="pCur"><option value="$">$</option><option value="JD">JD</option></select>
+            <button onclick="saveProduct()" class="admin-btn">إضافة</button>
+            <hr>
+            <div id="adminProductsList"></div>
+            <button onclick="closeModals()" class="admin-btn danger">خروج</button>
         </div>
     </div>
 </div>
 
 <script>
-    // إعداد Firebase
-    const firebaseConfig = { databaseURL: "https://zxf-support-default-rtdb.firebaseio.com" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const PASS = "8899916710";
+    
+    window.onload = () => {
+        const checkFirebase = setInterval(() => {
+            if (window.db) {
+                clearInterval(checkFirebase);
+                initApp();
+            }
+        }, 500);
+    };
 
-    const ADMIN_PASSWORD = "8899916710";
-    let customerId = localStorage.getItem("cust_id") || "c_" + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem("cust_id", customerId);
-
-    // تحميل المنتجات للجميع
-    function loadProducts() {
-        db.ref('roblox_products').on('value', (snap) => {
-            const container = document.getElementById("productsContainer");
-            const adminList = document.getElementById("adminProductsList");
-            container.innerHTML = "";
-            adminList.innerHTML = "";
-            
-            if(!snap.exists()) { container.innerHTML = "لا يوجد منتجات حالياً."; return; }
-
-            snap.forEach((child) => {
-                const p = child.val();
-                const key = child.key;
-
-                // للعرض العام
-                container.innerHTML += `
-                    <div class="product-card">
-                        <img class="product-img" src="${p.image}" onerror="this.src='https://picsum.photos/id/20/300/200'">
-                        <h3>${p.name}</h3>
-                        <p style="color:#ffd966">${p.price} $</p>
-                        <button class="buy-btn" onclick="openTicket('${key}', '${p.name}')">🛒 شراء</button>
-                    </div>`;
-
-                // للعرض في لوحة الإدارة (للحذف)
-                adminList.innerHTML += `<div>${p.name} <button onclick="deleteProduct('${key}')" style="color:red">حذف</button></div>`;
-            });
+    function initApp() {
+        const { query, collection, orderBy, onSnapshot } = window.dbUtils;
+        const q = query(collection(window.db, "products"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const products = [];
+            snapshot.forEach(doc => products.push({id: doc.id, ...doc.data()}));
+            render(products);
+            renderAdminList(products);
         });
     }
 
-    function addProduct() {
+    function render(products) {
+        const container = document.getElementById("productsContainer");
+        container.innerHTML = products.map(p => `
+            <div class="product-card">
+                <img src="${p.image}" class="product-img" onerror="this.src='https://picsum.photos/id/20/300/200'">
+                <div class="product-title">${p.name}</div>
+                <div class="product-price">${p.currency} ${p.price}</div>
+                <button class="buy-btn" onclick="alert('تواصل معنا للشراء!')">🛒 شراء</button>
+            </div>
+        `).join("");
+    }
+
+    async function saveProduct() {
         const name = document.getElementById("pName").value;
+        const description = document.getElementById("pDesc").value;
         const image = document.getElementById("pImg").value;
         const price = document.getElementById("pPrice").value;
-        if(!name || !price) return alert("املا البيانات");
-
-        db.ref('roblox_products').push({ name, image, price })
-        .then(() => { alert("تم النشر للجميع!"); document.getElementById("pName").value=""; });
+        const currency = document.getElementById("pCur").value;
+        if(!name || !price) return alert("املأ البيانات");
+        await window.dbUtils.addDoc(window.dbUtils.collection(window.db, "products"), {
+            name, description, image, price, currency,
+            createdAt: window.dbUtils.serverTimestamp()
+        });
+        alert("تمت الإضافة!");
     }
 
-    function deleteProduct(key) {
-        if(confirm("حذف المنتج من عند الكل؟")) db.ref('roblox_products').child(key).remove();
+    function renderAdminList(products) {
+        const list = document.getElementById("adminProductsList");
+        list.innerHTML = products.map(p => `
+            <div class="ticket-item">
+                <span>${p.name}</span>
+                <button onclick="deleteProd('${p.id}')" style="background:red; color:white; border:none; padding:5px 10px; border-radius:10px;">حذف</button>
+            </div>
+        `).join("");
     }
 
-    // نظام التذاكر (مربوط بـ Firebase لضمان وصول الرسائل)
-    function openTicket(id, name) {
-        const tId = customerId + "_" + id;
-        db.ref('tickets/' + tId).update({ productName: name, customerId: customerId, status: 'open' });
-        alert("تم فتح تذكرة! اذهب لـ 'تذاكري' للتواصل مع ليث.");
+    async function deleteProd(id) {
+        await window.dbUtils.deleteDoc(window.dbUtils.doc(window.db, "products", id));
     }
 
-    // إدارة المودالات والقائمة الجانبية
-    const sidebar = document.getElementById("sidebar");
-    document.getElementById("menuBtn").onclick = () => sidebar.classList.add("open");
-    document.getElementById("closeSidebar").onclick = () => sidebar.classList.remove("open");
-    document.getElementById("sidebarAdminBtn").onclick = () => { document.getElementById("adminModal").style.display="flex"; sidebar.classList.remove("open"); };
-    document.getElementById("sidebarTicketsBtn").onclick = () => { document.getElementById("ticketsModal").style.display="flex"; sidebar.classList.remove("open"); };
-    
-    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display="none"); }
-    function checkAdmin() {
-        if(document.getElementById("adminPassword").value === ADMIN_PASSWORD) {
-            document.getElementById("passArea").style.display="none";
-            document.getElementById("adminPanel").style.display="block";
-        } else { alert("غلط"); }
+    function openAdmin() { document.getElementById("adminModal").style.display = "flex"; }
+    function closeModals() { document.getElementById("adminModal").style.display = "none"; }
+    function checkPass() {
+        if(document.getElementById("adminPassword").value === PASS) {
+            document.getElementById("passwordScreen").style.display = "none";
+            document.getElementById("adminPanel").style.display = "block";
+        } else alert("خطأ");
     }
-
-    window.onclick = (e) => { if(e.target.className === 'modal') closeModals(); };
-
-    loadProducts();
+    document.getElementById("menuBtn").onclick = () => document.getElementById("sidebar").classList.add("open");
+    document.getElementById("closeSidebar").onclick = () => document.getElementById("sidebar").classList.remove("open");
 </script>
+
 </body>
 </html>
